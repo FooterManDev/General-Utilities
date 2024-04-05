@@ -1,5 +1,7 @@
 name: Feature Request
 description: Request new features for General Utilities
+labels: ["Enhancement"]
+title: "[Suggestion] - "
 body:
   - type: textarea
     attributes:
