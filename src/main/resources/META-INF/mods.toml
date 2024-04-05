@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "GPL-3.0"
+
+[[mods]]
+modId = "gutils"
+version = "${version}"
+displayName = "General Utilities"
+# This is your mod's "homepage" and will be displayed on the mod's information screen in the Mods panel.
+# displayURL="https://changeme.dev/"
+# logoFile="icon.png"
+authors="FooterMan"
+description = '''
+Includes useful tools for Mod/Modpack Developers.
+'''
+[[dependencies.gutils]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.gutils]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,)"
+ordering = "NONE"
+side = "BOTH"
