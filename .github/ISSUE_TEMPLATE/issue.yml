@@ -1,6 +1,7 @@
 name: Issue
 description: Report issues with General Utilities.
 labels: ["Bug"]
+title: "[Bug] - "
 body:
   - type: textarea
     attributes:
