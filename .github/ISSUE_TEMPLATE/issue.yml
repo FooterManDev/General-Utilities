@@ -1,0 +1,36 @@
+name: Issue
+description: Report issues with General Utilities.
+body:
+  - type: textarea
+    attributes:
+      label: Description
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+  - type: input
+    attributes:
+      label: Loader version
+      description: What modloader version are you using?
+      placeholder: eg, Forge 47.2.1
+    validations:
+      required: true
+  - type: dropdown
+    id: mod_version
+    attributes:
+      label: Mod version
+      description: What version of General Utilities are you using?
+      options:
+        - 1.0.0
+        - Current Source
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: "Provide latest.log, debug.log, or crash report here."
+      description: "Do not send as raw files. Use Github Gist, and set it to never expire."
