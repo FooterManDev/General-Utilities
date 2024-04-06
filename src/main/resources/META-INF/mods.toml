@@ -6,12 +6,11 @@ license = "GPL-3.0"
 modId = "gutils"
 version = "${version}"
 displayName = "General Utilities"
-# This is your mod's "homepage" and will be displayed on the mod's information screen in the Mods panel.
 # displayURL="https://changeme.dev/"
-# logoFile="icon.png"
+logoFile="icon.png"
 authors="FooterMan"
 description = '''
-Includes useful tools for Mod/Modpack Developers.
+Includes useful commands for Mod/ModPack Developers.
 '''
 [[dependencies.gutils]]
 modId = "forge"
