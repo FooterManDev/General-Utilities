@@ -1,8 +1,11 @@
 package dev.footer.gutils;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import dev.footer.gutils.cmd.CmdRegistry;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.common.NeoForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,5 +20,7 @@ public class GeneralUtilities {
 
     public GeneralUtilities() {
         IEventBus MOD_BUS = FMLJavaModLoadingContext.get().getModEventBus();
+
+        NeoForge.EVENT_BUS.register(new CmdRegistry());
     }
 }

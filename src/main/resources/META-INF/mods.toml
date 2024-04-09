@@ -1,27 +1,27 @@
 modLoader = "javafml"
-loaderVersion = "[47,)"
-license = "GPL-3.0"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
 
 [[mods]]
-modId = "gutils"
-version = "${version}"
-displayName = "General Utilities"
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
 # displayURL="https://changeme.dev/"
-logoFile="icon.png"
-authors="FooterMan"
-description = '''
-Includes useful commands for Mod/ModPack Developers.
-'''
-[[dependencies.gutils]]
-modId = "forge"
+logoFile = "icon.png"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
+
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
 mandatory = true
-versionRange = "[47,)"
+versionRange = "${neo_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.gutils]]
+[[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20.1,)"
+versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
