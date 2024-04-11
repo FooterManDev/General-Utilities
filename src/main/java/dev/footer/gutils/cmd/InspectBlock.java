@@ -4,12 +4,13 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.footer.gutils.lib.IdStyler;
+import dev.footer.gutils.lib.Styler;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Explosion;
@@ -27,6 +28,7 @@ public class InspectBlock implements Command<CommandSourceStack> {
         return Commands.literal("inspect_block")
                 .executes(new InspectBlock())
                 .then(Commands.literal("sounds").executes(InspectBlock::displayAllSounds))
+                .then(Commands.literal("tags").executes(InspectBlock::displayTags))
                 ;
     }
 
@@ -44,6 +46,26 @@ public class InspectBlock implements Command<CommandSourceStack> {
         return null;
     }
 
+    public static int displayTags(CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack src = ctx.getSource();
+        BlockPos pos = getTarget(ctx.getSource());
+        if (pos != null && src.getEntity() instanceof Player p) {
+            BlockState state = p.level().getBlockState(pos);
+            Block b = state.getBlock();
+
+            Component blockName = Styler.formatBlock(b);
+
+            MutableComponent props = Component.literal("\n§6Tags§f: ");
+            Component tags = Styler.formatBlockTags(b);
+            Component msg = Component.literal("")
+                    .append(blockName)
+                    .append(props)
+                    .append(tags);
+            p.sendSystemMessage(msg);
+        }
+        return 0;
+    }
+
     private static int displayAllSounds(CommandContext<CommandSourceStack> ctx) {
         BlockPos pos = getTarget(ctx.getSource());
         if (pos != null) {
@@ -52,7 +74,7 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 BlockState state = p.level().getBlockState(pos);
                 Block b = state.getBlock();
 
-                Component blockName = IdStyler.formatBlock(b);
+                Component blockName = Styler.formatBlock(b);
 
                 SoundType soundType = b.getSoundType(state, p.level(), pos, p);
 
@@ -83,7 +105,7 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 Block b = state.getBlock();
                 Level level = p.level();
 
-                Component blockName = IdStyler.formatBlock(b);
+                Component blockName = Styler.formatBlock(b);
 
                 int light = b.getLightEmission(state, level, pos);
                 String lightColors;
