@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /*
-This class is used to format Item/Block IDs.
+This class is used to format various components in chat.
  */
 
 public class Styler {
