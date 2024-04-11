@@ -3,7 +3,6 @@ package dev.footer.gutils.cmd;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.footer.gutils.lib.Styler;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -27,7 +26,7 @@ public class InspectBlock implements Command<CommandSourceStack> {
     public static LiteralArgumentBuilder<CommandSourceStack> reg() {
         return Commands.literal("inspect_block")
                 .executes(new InspectBlock())
-                .then(Commands.literal("sounds").executes(InspectBlock::displayAllSounds))
+                .then(Commands.literal("sounds").executes(InspectBlock::displaySounds))
                 .then(Commands.literal("tags").executes(InspectBlock::displayTags))
                 ;
     }
@@ -66,7 +65,7 @@ public class InspectBlock implements Command<CommandSourceStack> {
         return 0;
     }
 
-    private static int displayAllSounds(CommandContext<CommandSourceStack> ctx) {
+    private static int displaySounds(CommandContext<CommandSourceStack> ctx) {
         BlockPos pos = getTarget(ctx.getSource());
         if (pos != null) {
             CommandSourceStack src = ctx.getSource();
@@ -79,10 +78,10 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 SoundType soundType = b.getSoundType(state, p.level(), pos, p);
 
                 Component sounds = Component.literal("\n§6Sounds§f: ")
-                        .append("\nHit: §a" + soundType.getHitSound().getLocation())
-                        .append("\nBreak: §a" + soundType.getBreakSound().getLocation())
-                        .append("\nStep: §a" + soundType.getStepSound().getLocation())
-                        .append("\nPlace: §a" + soundType.getPlaceSound().getLocation());
+                        .append("\n§cHit§a: §b" + soundType.getHitSound().getLocation())
+                        .append("\n§cBreak§a: §b" + soundType.getBreakSound().getLocation())
+                        .append("\n§cStep§a: §b" + soundType.getStepSound().getLocation())
+                        .append("\n§cPlace§a: §b" + soundType.getPlaceSound().getLocation());
 
                 Component msg = Component.literal("")
                         .append(blockName)
@@ -96,7 +95,7 @@ public class InspectBlock implements Command<CommandSourceStack> {
     }
 
     @Override
-    public int run(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    public int run(CommandContext<CommandSourceStack> ctx) {
         BlockPos pos = getTarget(ctx.getSource());
         if (pos != null) {
             CommandSourceStack src = ctx.getSource();
@@ -132,13 +131,13 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 float explosionResistance = b.getExplosionResistance(state, level, pos, dummyExpl);
 
                 Component props = Component.literal("\n§6Properties§f: ")
-                        .append("\n§cHardness§f: ").append("§b" + b.defaultDestroyTime() + "F")
-                        .append("\n§cFriction§f: ").append("§b" + b.getFriction() + "F")
-                        .append("\n§cExplosion Resistance§f: ").append("§b" + explosionResistance + "F")
-                        .append("\n§cJump Factor§f: ").append("§b" + b.getJumpFactor() + "F")
-                        .append("\n§cSpeed Factor§f: ").append("§b" + b.getSpeedFactor() + "F")
-                        .append("\n§cLight Emission§f: ").append(lightColors + light)
-                        .append("\n§cFlammability§f: ").append(flameColors + flammability)
+                        .append("\n§cHardness§a: ").append("§b" + b.defaultDestroyTime() + "F")
+                        .append("\n§cFriction§a: ").append("§b" + b.getFriction() + "F")
+                        .append("\n§cExplosion Resistance§a: ").append("§b" + explosionResistance + "F")
+                        .append("\n§cJump Factor§a: ").append("§b" + b.getJumpFactor() + "F")
+                        .append("\n§cSpeed Factor§a: ").append("§b" + b.getSpeedFactor() + "F")
+                        .append("\n§cLight Emission§a: ").append(lightColors + light)
+                        .append("\n§cFlammability§a: ").append(flameColors + flammability)
                         ;
 
                 Component msg = Component.literal("")

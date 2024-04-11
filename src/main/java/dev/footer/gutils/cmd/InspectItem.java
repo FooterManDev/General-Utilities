@@ -66,9 +66,9 @@ public class InspectItem implements Command<CommandSourceStack> {
                 Component itemName = Styler.formatItem(stack.getItem());
 
                 Component props = Component.literal("\n§6Food Properties§f: ")
-                        .append("\n§cNutrition: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getNutrition())
-                        .append("\n§cSaturation: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getSaturationModifier() + "F")
-                        .append("\n§cEffects: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getEffects())
+                        .append("\n§cNutrition§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getNutrition())
+                        .append("\n§cSaturation§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getSaturationModifier() + "F")
+                        .append("\n§cEffects§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getEffects())
                         ;
 
                 Component msg = Component.literal("")
@@ -92,9 +92,8 @@ public class InspectItem implements Command<CommandSourceStack> {
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
                 MutableComponent enchants = Component.literal("\n§5Enchantments§f: ");
 
-                    enchantments.forEach((enchantment, level) -> {
-                        enchants.append("\n§c" + enchantment.getFullname(level).plainCopy().getString() + "§a: §d" + level);
-                    });
+                    enchantments.forEach((enchantment, level) -> enchants.append("\n§c" +
+                            enchantment.getFullname(level).plainCopy().getString() + "§a: §d" + level));
 
                 Component msg = Component.literal("")
                         .append(itemName)
