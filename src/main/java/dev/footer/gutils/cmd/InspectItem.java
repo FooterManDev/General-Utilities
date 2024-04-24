@@ -1,29 +1,26 @@
 package dev.footer.gutils.cmd;
 
-import com.google.common.collect.Multimap;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import dev.footer.gutils.lib.Styler;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.UnaryOperator;
 
 import static net.minecraft.world.item.Rarity.*;
@@ -61,21 +58,42 @@ public class InspectItem implements Command<CommandSourceStack> {
         CommandSourceStack src = ctx.getSource();
         if(src.getEntity() instanceof Player p) {
             ItemStack stack = p.getMainHandItem();
-            if(!stack.isEmpty() && stack.isEdible()) {
+            if(!stack.isEmpty()) {
+                if(stack.has(DataComponents.FOOD)) {
 
-                Component itemName = Styler.formatItem(stack.getItem());
+                    Component itemName = Styler.formatItem(stack.getItem());
+                    var effectsList = Objects.requireNonNull(stack.getFoodProperties(p)).effects().stream().toList();
+                    MutableComponent effects = Component.literal("");
 
-                Component props = Component.literal("\n§6Food Properties§f: ")
-                        .append("\n§cNutrition§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getNutrition())
-                        .append("\n§cSaturation§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getSaturationModifier() + "F")
-                        .append("\n§cEffects§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).getEffects())
-                        ;
+//                for (FoodProperties.PossibleEffect effectInstance : stack.getFoodProperties(p).effects()) {
+//                    MobEffect effect = effectInstance.effect().getEffect().value();
+//                    int lvl = effectInstance.effect().getAmplifier() + 1;
+//                    MutableComponent effectName = effect.getDisplayName().plainCopy();
+//                    effects.append("\n§c" + effectName + "§a: ").append("§b" + lvl);
+//                }
 
-                Component msg = Component.literal("")
-                        .append(itemName)
-                        .append(props);
+//                effectsList.forEach(e -> {
+//                    Component effect = Styler.formatMobEffect(stack, p);
+//                    effects.append(effect);
+//                });
 
-                p.sendSystemMessage(msg);
+                    Component props = Component.literal("\n§6Food Properties§f: ")
+                            .append("\n§cNutrition§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).nutrition())
+                            .append("\n§cSaturation§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).saturation())
+                            .append("\n§cCanAlwaysEat§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).canAlwaysEat())
+//                        .append("\n§cEffects§a: ").append("§b" + effects)
+                            ;
+
+                    Component msg = Component.literal("")
+                            .append(itemName)
+                            .append(props);
+
+                    p.sendSystemMessage(msg);
+                } else {
+                    p.sendSystemMessage(Component.literal("§cItem does not have Food Component!"));
+                }
+            } else {
+                p.sendSystemMessage(Component.literal("§cItem or Hand is Empty."));
             }
         }
         return 0;
@@ -89,11 +107,15 @@ public class InspectItem implements Command<CommandSourceStack> {
 
                 Component itemName = Styler.formatItem(stack.getItem());
 
-                Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
+                ItemEnchantments enchantments = stack.getEnchantments();
                 MutableComponent enchants = Component.literal("\n§5Enchantments§f: ");
 
-                    enchantments.forEach((enchantment, level) -> enchants.append("\n§c" +
-                            enchantment.getFullname(level).plainCopy().getString() + "§a: §d" + level));
+                    for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+                        Enchantment enchantment = entry.getKey().value();
+                        int lvl = entry.getIntValue();
+                        enchants.append("\n§c" +
+                                enchantment.getFullname(lvl).plainCopy().getString() + "§a: §d" + lvl);
+                }
 
                 Component msg = Component.literal("")
                         .append(itemName)
@@ -111,7 +133,7 @@ public class InspectItem implements Command<CommandSourceStack> {
         if(src.getEntity() instanceof Player p) {
 
             ItemStack stack = p.getMainHandItem();
-            Multimap<Attribute, AttributeModifier> attributes = stack.getAttributeModifiers(EquipmentSlot.MAINHAND);
+            ItemAttributeModifiers attributes = stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
             MutableComponent atts = Component.literal("");
 
             if(!stack.isEmpty()) {
@@ -137,17 +159,23 @@ public class InspectItem implements Command<CommandSourceStack> {
                     isDmgable.append("\n§cDurability§a: ").append(durability).append(" §6/§b " + stack.getMaxDamage());
                 }
 
-                Collection<AttributeModifier> speedAtt = attributes.get(Attributes.ATTACK_SPEED);
-                if(!speedAtt.isEmpty()) {
-                    double speed = speedAtt.iterator().next().getAmount();
-                    double roundedSpeed = Math.round(speed * 10.0) / 10.0;
-                    atts.append("\n§cSpeed§a: ").append("§b" + roundedSpeed + "§aD");
+                Integer attackdmg = stack.get(DataComponents.DAMAGE);
+
+                if(!(attackdmg == null)) {
+                    atts.append("\n§cAttackDamage§a: ").append("§b" + attackdmg);
                 }
-                Collection<AttributeModifier> attackDmgAtt = attributes.get(Attributes.ATTACK_DAMAGE);
-                if(!attackDmgAtt.isEmpty()) {
-                    double attackDmg = attackDmgAtt.iterator().next().getAmount();
-                    atts.append("\n§cAttackDamage§a: ").append("§b" + attackDmg + "§aD");
-                }
+
+//                Collection<AttributeModifier> speedAtt = attributes.get(Attributes.ATTACK_SPEED)
+//                if(!speedAtt.isEmpty()) {
+//                    double speed = speedAtt.iterator().next().getAmount();
+//                    double roundedSpeed = Math.round(speed * 10.0) / 10.0;
+//                    atts.append("\n§cSpeed§a: ").append("§b" + roundedSpeed + "§aD");
+//                }
+//                Collection<AttributeModifier> attackDmgAtt = attributes.get(Attributes.ATTACK_DAMAGE);
+//                if(!attackDmgAtt.isEmpty()) {
+//                    double attackDmg = attackDmgAtt.iterator().next().getAmount();
+//                    atts.append("\n§cAttackDamage§a: ").append("§b" + attackDmg + "§aD");
+//                }
 
                 Component props = Component.literal("\n§6Properties§f: ")
                         .append(isDmgable)

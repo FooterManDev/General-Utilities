@@ -3,15 +3,15 @@ package dev.footer.gutils.lib;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -36,7 +36,14 @@ public class Styler {
             Component semi = Component.literal(":").withStyle(ChatFormatting.GOLD);
             Component name = Component.literal(id).withStyle(ChatFormatting.YELLOW);
 
-            return Component.literal("").append(namespace).append(semi).append(name);
+            Component full = Component.literal("").append(namespace).append(semi).append(name);
+
+            full = Component.literal("").append(full).withStyle(Style.EMPTY.withClickEvent(
+                    new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, full.getString())
+            )).withStyle(
+                    Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to copy")))
+            );
+            return Component.literal("").append(full);
         }
         return Component.literal("Unknown Item");
     }
@@ -55,7 +62,14 @@ public class Styler {
             Component semi = Component.literal(":").withStyle(ChatFormatting.GOLD);
             Component name = Component.literal(id).withStyle(ChatFormatting.YELLOW);
 
-            return Component.literal("").append(namespace).append(semi).append(name);
+            Component full = Component.literal("").append(namespace).append(semi).append(name);
+
+            full = Component.literal("").append(full).withStyle(Style.EMPTY.withClickEvent(
+                    new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, full.getString())
+            )).withStyle(
+                    Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to copy")))
+            );
+            return Component.literal("").append(full);
         }
         return Component.literal("Unknown Block");
     }
@@ -158,5 +172,20 @@ public class Styler {
         Style durabilityCol = Style.EMPTY.withColor(barColor);
 
         return Component.literal(String.valueOf(remainingDurability)).withStyle(durabilityCol);
+    }
+
+    public static Component formatMobEffect(ItemStack stack, Player p) {
+
+        Iterator<FoodProperties.PossibleEffect> effects = Objects.requireNonNull(stack.getFoodProperties(p)).effects().iterator();
+        MobEffect effect = effects.next().effect().getEffect().value();
+        String name = effect.getDisplayName().getString();
+
+        int index = name.indexOf(' ');
+        String formatted = index != -1 ? name.substring(0, index) : name;
+
+        int col = effect.getColor();
+        Style effectCol = Style.EMPTY.withColor(col);
+
+        return Component.literal(formatted).withStyle(effectCol);
     }
 }

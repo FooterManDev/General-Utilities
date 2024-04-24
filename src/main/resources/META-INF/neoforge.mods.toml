@@ -3,7 +3,7 @@ loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
 
 [[mods]]
-modId = "${mod_id}"
+modId = "gutils"
 version = "${mod_version}"
 displayName = "${mod_name}"
 # displayURL="https://changeme.dev/"
@@ -12,16 +12,9 @@ authors = "${mod_authors}"
 description = '''${mod_description}'''
 
 
-[[dependencies.${mod_id}]]
+[[dependencies.gutils]]
 modId = "neoforge"
-mandatory = true
-versionRange = "${neo_version_range}"
-ordering = "NONE"
-side = "BOTH"
-
-[[dependencies.${mod_id}]]
-modId = "minecraft"
-mandatory = true
-versionRange = "${minecraft_version_range}"
+type = "required"
+versionRange = "*"
 ordering = "NONE"
 side = "BOTH"
