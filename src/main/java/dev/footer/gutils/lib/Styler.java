@@ -1,6 +1,7 @@
 package dev.footer.gutils.lib;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.*;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
@@ -8,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -59,10 +61,10 @@ public class Styler {
             String id = parts[1];
 
             Component namespace = Component.literal(modId).withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.YELLOW);
-            Component semi = Component.literal(":").withStyle(ChatFormatting.GOLD);
+            Component colon = Component.literal(":").withStyle(ChatFormatting.GOLD);
             Component name = Component.literal(id).withStyle(ChatFormatting.YELLOW);
 
-            Component full = Component.literal("").append(namespace).append(semi).append(name);
+            Component full = Component.literal("").append(namespace).append(colon).append(name);
 
             full = Component.literal("").append(full).withStyle(Style.EMPTY.withClickEvent(
                     new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, full.getString())
@@ -90,7 +92,7 @@ public class Styler {
 
                     String[] parts = tagPart.split(":");
                     if (parts.length >= 2) {
-                        String modid = parts[0];
+                        String modid = parts[0].substring(1);
                         String tagName = parts[1];
 
                         tagsByModId.computeIfAbsent(modid, k -> new ArrayList<>()).add(tagName);
@@ -136,7 +138,52 @@ public class Styler {
 
                     String[] parts = tagPart.split(":");
                     if (parts.length >= 2) {
-                        String modid = parts[0];
+                        String modid = parts[0].substring(1);
+                        String tagName = parts[1];
+
+                        tagsByModId.computeIfAbsent(modid, k -> new ArrayList<>()).add(tagName);
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<String, List<String>> entry : tagsByModId.entrySet()) {
+            String modid = entry.getKey();
+            List<String> tagNames = entry.getValue();
+
+            Component namespace = Component.literal(modid).withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.RED);
+
+            for (String tagName : tagNames) {
+                Component tag = Component.literal(tagName).withStyle(ChatFormatting.AQUA);
+                Component colon = Component.literal(":").withStyle(ChatFormatting.GREEN);
+
+                MutableComponent singleTag = Component.literal("").append(namespace).append(colon).append(tag);
+                singleTag = singleTag.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, singleTag.getString())));
+                singleTag = singleTag.withStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to copy"))));
+                tagsComponent = tagsComponent.append("\n").append(singleTag);
+            }
+        }
+
+        return tagsComponent;
+    }
+
+    public static Component formatBiomeTags(Holder<Biome> b) {
+        MutableComponent tagsComponent = Component.literal("");
+        Stream<TagKey<Biome>> tags = b.tags();
+        List<String> tagKeys = tags.map(TagKey::toString).toList();
+        Map<String, List<String>> tagsByModId = new HashMap<>();
+
+        if (!tagKeys.isEmpty()) {
+            for (String tagKey : tagKeys) {
+                Pattern pattern = Pattern.compile("TagKey\\[.*?/(.*?)]");
+                Matcher matcher = pattern.matcher(tagKey);
+
+                if (matcher.find()) {
+                    String tagPart = matcher.group(1);
+
+                    String[] parts = tagPart.split(":");
+                    if (parts.length >= 2) {
+                        String modid = parts[0].substring(8);
                         String tagName = parts[1];
 
                         tagsByModId.computeIfAbsent(modid, k -> new ArrayList<>()).add(tagName);
@@ -187,5 +234,32 @@ public class Styler {
         Style effectCol = Style.EMPTY.withColor(col);
 
         return Component.literal(formatted).withStyle(effectCol);
+    }
+
+    public static Component formatBiome(String string, Biome biome) {
+
+        String[] parts = string.split(":");
+        if (parts.length >= 2) {
+            String modId = parts[0];
+            String id = parts[1];
+
+            int col = biome.getFoliageColor();
+
+            Component namespace = Component.literal(modId).withStyle(ChatFormatting.ITALIC).withColor(col);
+            Component colon = Component.literal(":");
+            Component name = Component.literal(id).withColor(col);
+
+            Component full = Component.literal("").append(namespace).append(colon).append(name);
+
+            full = Component.literal("").append(full).withStyle(Style.EMPTY.withClickEvent(
+                    new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, full.getString())
+            )).withStyle(
+                    Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to copy")))
+            );
+
+            return Component.literal("").append(full);
+        }
+
+        return Component.literal("Unable to format biome!");
     }
 }

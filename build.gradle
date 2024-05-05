@@ -50,6 +50,7 @@ base {
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
 runs {
     configureEach {
         systemProperty 'forge.logging.markers', 'REGISTRIES'
@@ -83,10 +84,17 @@ repositories {
     maven {
         url "https://maven.firstdark.dev/snapshots"
     }
+    maven { url "https://maven.architectury.dev/" }
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
+    implementation "net.neoforged:neoforge:$neo_version"
+//    runtimeOnly "me.shedaniel:RoughlyEnoughItems-neoforge:$rei_version"
+//    api "me.shedaniel:RoughlyEnoughItems-api-neoforge:$rei_version"
+//    runtimeOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:$rei_version"
+//    implementation "me.shedaniel.cloth:cloth-config-neoforge:$cloth_ver"
+//    api "dev.architectury:architectury-neoforge:$arch_ver"
+
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -121,4 +129,10 @@ jar {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+minecraft {
+    accessTransformers {
+        file("src/main/resources/META-INF/accesstransformer.cfg")
+    }
 }

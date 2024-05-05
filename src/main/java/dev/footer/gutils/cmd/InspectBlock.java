@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 @SuppressWarnings({"redundant", "cast"})
 public class InspectBlock implements Command<CommandSourceStack> {
     public static LiteralArgumentBuilder<CommandSourceStack> reg() {
-        return Commands.literal("inspect_block")
+        return Commands.literal("inspectBlock")
                 .executes(new InspectBlock())
                 .then(Commands.literal("sounds").executes(InspectBlock::displaySounds))
                 .then(Commands.literal("tags").executes(InspectBlock::displayTags))
@@ -54,13 +54,15 @@ public class InspectBlock implements Command<CommandSourceStack> {
 
             Component blockName = Styler.formatBlock(b);
 
-            MutableComponent props = Component.literal("\n§6Tags§f: ");
+            MutableComponent props = Component.literal("\n§6Block Tags§f: ");
             Component tags = Styler.formatBlockTags(b);
             Component msg = Component.literal("")
                     .append(blockName)
                     .append(props)
                     .append(tags);
             p.sendSystemMessage(msg);
+        } else {
+            src.sendSystemMessage(Component.literal("§cNo Block found!"));
         }
         return 0;
     }
@@ -90,6 +92,8 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 p.sendSystemMessage(msg);
             }
             return Command.SINGLE_SUCCESS;
+        } else {
+            ctx.getSource().sendSystemMessage(Component.literal("§cNo Block found!"));
         }
         return 0;
     }
@@ -131,11 +135,11 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 float explosionResistance = b.getExplosionResistance(state, level, pos, dummyExpl);
 
                 Component props = Component.literal("\n§6Properties§f: ")
-                        .append("\n§cHardness§a: ").append("§b" + b.defaultDestroyTime() + "F")
-                        .append("\n§cFriction§a: ").append("§b" + b.getFriction() + "F")
-                        .append("\n§cExplosion Resistance§a: ").append("§b" + explosionResistance + "F")
-                        .append("\n§cJump Factor§a: ").append("§b" + b.getJumpFactor() + "F")
-                        .append("\n§cSpeed Factor§a: ").append("§b" + b.getSpeedFactor() + "F")
+                        .append("\n§cHardness§a: ").append("§b" + b.defaultDestroyTime() + "§aF")
+                        .append("\n§cFriction§a: ").append("§b" + b.getFriction() + "§aF")
+                        .append("\n§cExplosion Resistance§a: ").append("§b" + explosionResistance + "§aF")
+                        .append("\n§cJump Factor§a: ").append("§b" + b.getJumpFactor() + "§aF")
+                        .append("\n§cSpeed Factor§a: ").append("§b" + b.getSpeedFactor() + "§aF")
                         .append("\n§cLight Emission§a: ").append(lightColors + light)
                         .append("\n§cFlammability§a: ").append(flameColors + flammability)
                         ;
@@ -147,6 +151,8 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 p.sendSystemMessage(msg);
             }
             return Command.SINGLE_SUCCESS;
+        } else {
+            ctx.getSource().sendSystemMessage(Component.literal("§cNo Block found!"));
         }
         return 0;
     }

@@ -29,7 +29,7 @@ import static net.minecraft.world.item.Rarity.*;
 public class InspectItem implements Command<CommandSourceStack> {
 
     public static LiteralArgumentBuilder<CommandSourceStack> reg() {
-        return Commands.literal("inspect_item")
+        return Commands.literal("inspectItem")
                 .executes(new InspectItem())
                 .then(Commands.literal("food").executes(InspectItem::displayFood))
                 .then(Commands.literal("tags").executes(InspectItem::displayTags))
@@ -42,13 +42,15 @@ public class InspectItem implements Command<CommandSourceStack> {
             ItemStack stack = p.getMainHandItem();
             Component itemName = Styler.formatItem(stack.getItem());
             if (!stack.isEmpty()) {
-                MutableComponent props = Component.literal("\n§6Tags§f: ");
+                MutableComponent props = Component.literal("\n§6Item Tags§f: ");
                 Component tags = Styler.formatItemTags(stack);
                 Component msg = Component.literal("")
                         .append(itemName)
                         .append(props)
                         .append(tags);
                 p.sendSystemMessage(msg);
+            } else {
+                p.sendSystemMessage(Component.literal("§cItem or Hand is Empty."));
             }
         }
         return 0;
@@ -122,6 +124,10 @@ public class InspectItem implements Command<CommandSourceStack> {
                         .append(enchants);
 
                 p.sendSystemMessage(msg);
+            } else if(!stack.isEnchanted() && !stack.isEmpty()) {
+                p.sendSystemMessage(Component.literal("§cItem is not Enchanted!"));
+            } else if(stack.isEmpty()) {
+                p.sendSystemMessage(Component.literal("§cItem or Hand is Empty."));
             }
         }
         return 0;
@@ -195,6 +201,8 @@ public class InspectItem implements Command<CommandSourceStack> {
 
 
                 p.sendSystemMessage(msg);
+            } else {
+                p.sendSystemMessage(Component.literal("§cItem or Hand is Empty."));
             }
         }
         return 0;
