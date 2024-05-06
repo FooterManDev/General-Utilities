@@ -1,5 +1,11 @@
-Initial 20.6 release:
+### 2.0
 
-* `/inspect_item food`: Effects removed, added "CanAlwaysEat", and added messages if held Item has no Food Component, and if there is no held Item at all.
-* Item IDs shown on inspect commands are now copyable.
-* Attack Damage and Speed currently disabled... for now.
+* Added `inspectBiome` command, to show Biome Properties.
+* `inspectBiome` arguments:
+> `color` | Returns all Color properties. \
+> `tags` | Returns all Biome Tags. \
+> `features` | Returns all Biome Features. \
+> `sounds` | Returns all Biome Sounds.
+* All commands are now camelCase.
+* All commands now return Errors, if something went wrong.
+* Commands that return Tags no longer have Whitespace before tag IDs.
