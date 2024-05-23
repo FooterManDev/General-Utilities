@@ -1,9 +1,12 @@
 package dev.footer.gutils.cmd;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import dev.footer.gutils.lib.Styler;
+import dev.footer.gutils.GeneralUtilities;
+import dev.footer.gutils.lib.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -21,6 +24,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 @SuppressWarnings({"redundant", "cast"})
 public class InspectBlock implements Command<CommandSourceStack> {
     public static LiteralArgumentBuilder<CommandSourceStack> reg() {
@@ -28,8 +36,11 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 .executes(new InspectBlock())
                 .then(Commands.literal("sounds").executes(InspectBlock::displaySounds))
                 .then(Commands.literal("tags").executes(InspectBlock::displayTags))
+//                .then(Commands.literal("energy").executes(InspectBlock::displayEnergy))
                 ;
     }
+
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private static BlockPos getTarget(CommandSourceStack src) {
         if (src.getEntity() instanceof Player p) {
@@ -98,8 +109,29 @@ public class InspectBlock implements Command<CommandSourceStack> {
         return 0;
     }
 
+    /*private static int displayEnergy(CommandContext<CommandSourceStack> ctx) {
+        BlockPos pos = getTarget(ctx.getSource());
+        if (pos != null) {
+            CommandSourceStack src = ctx.getSource();
+            if (src.getEntity() instanceof Player p) {
+                BlockState state = p.level().getBlockState(pos);
+                BlockEntity be = p.level().getBlockEntity(pos);
+                Block b = state.getBlock();
+                p.level().getCapability(Capabilities.EnergyStorage, pos)
+
+
+                if(state.hasBlockEntity()) {
+                    int storedEnergy = Capabilities.EnergyStorage.BLOCK.getCapability(p.level(), pos, state, be,)
+                }
+            }
+        }
+        return 0;
+    }*/
+
+
     @Override
     public int run(CommandContext<CommandSourceStack> ctx) {
+        Map<String, Object> json = new HashMap<>();
         BlockPos pos = getTarget(ctx.getSource());
         if (pos != null) {
             CommandSourceStack src = ctx.getSource();
@@ -133,6 +165,15 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 Explosion dummyExpl = new Explosion(level, null, pos.getX(), pos.getY(), pos.getZ(), 0,
                         false, Explosion.BlockInteraction.DESTROY);
                 float explosionResistance = b.getExplosionResistance(state, level, pos, dummyExpl);
+
+                json.put("Hardness", b.defaultDestroyTime());
+                json.put("Friction", b.getFriction());
+                json.put("ExplosionResistance", explosionResistance);
+                json.put("JumpFactor", b.getJumpFactor());
+                json.put("SpeedFactor", b.getSpeedFactor());
+                json.put("LightEmission", light);
+                json.put("Flammability", flammability);
+                ExportJSON.export(json, "blockProperties", JsonExportDirs.BLOCK);
 
                 Component props = Component.literal("\n§6Properties§f: ")
                         .append("\n§cHardness§a: ").append("§b" + b.defaultDestroyTime() + "§aF")
