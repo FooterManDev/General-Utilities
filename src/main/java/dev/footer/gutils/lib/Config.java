@@ -1,28 +1,47 @@
 package dev.footer.gutils.lib;
 
 import dev.footer.gutils.GeneralUtilities;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class Config {
 
-    public final ModConfigSpec.BooleanValue json;
 
-    Config(ModConfigSpec.Builder builder) {
-        json = builder
-                .translation(GeneralUtilities.ID + "export_json")
-                .comment("Allows GUtils to export JSON from commands.")
-                .define("export_json", false)
-                ;
+    private static final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+    public static final ServerConfig config = new ServerConfig(builder);
+    public static final ModConfigSpec spec = builder.build();
+
+    public static class ServerConfig {
+
+        public final ModConfigSpec.IntValue inspectItemPerm;
+        public final ModConfigSpec.IntValue inspectBlockPerm;
+        public final ModConfigSpec.IntValue inspectBiomePerm;
+
+        ServerConfig(ModConfigSpec.Builder builder) {
+            inspectItemPerm = builder
+                    .comment("Permission level required to use /inspectItem.")
+                    .defineInRange("PermissionLevel", 0, 0, 4)
+            ;
+            inspectBlockPerm = builder
+                    .comment("Permission level required to use /inspectBlock.")
+                    .defineInRange("PermissionLevel", 0, 0, 4)
+            ;
+            inspectBiomePerm = builder
+                    .comment("Permission level required to use /inspectBiome.")
+                    .defineInRange("PermissionLevel", 0, 0, 4)
+            ;
+        }
     }
 
-    public static final ModConfigSpec config;
-    public static final Config clientConfig;
+    @SubscribeEvent
+    public static void load(final ModConfigEvent.Loading e) {
+        GeneralUtilities.LOGGER.debug("Loaded GUtils' ServerConfig {}", e.getConfig().getFileName());
+    }
 
-    static {
-        final Pair<Config, ModConfigSpec> pair = new ModConfigSpec.Builder()
-                .configure(Config::new);
-        config = pair.getRight();
-        clientConfig = pair.getLeft();
+    @SubscribeEvent
+    public static void fileChange(final ModConfigEvent.Reloading e) {
+        GeneralUtilities.LOGGER.debug("GUtils' ServerConfig changed");
     }
 }

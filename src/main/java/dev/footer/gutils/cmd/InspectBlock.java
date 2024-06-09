@@ -1,11 +1,8 @@
 package dev.footer.gutils.cmd;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import dev.footer.gutils.GeneralUtilities;
 import dev.footer.gutils.lib.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -24,23 +21,19 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings({"redundant", "cast"})
+@SuppressWarnings({"redundant", "cast", "resource"})
 public class InspectBlock implements Command<CommandSourceStack> {
     public static LiteralArgumentBuilder<CommandSourceStack> reg() {
         return Commands.literal("inspectBlock")
-                .executes(new InspectBlock())
+                .executes(new InspectBlock()).requires(src -> src.hasPermission(Config.config.inspectBlockPerm.getAsInt()))
                 .then(Commands.literal("sounds").executes(InspectBlock::displaySounds))
                 .then(Commands.literal("tags").executes(InspectBlock::displayTags))
 //                .then(Commands.literal("energy").executes(InspectBlock::displayEnergy))
                 ;
     }
-
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private static BlockPos getTarget(CommandSourceStack src) {
         if (src.getEntity() instanceof Player p) {
@@ -67,6 +60,7 @@ public class InspectBlock implements Command<CommandSourceStack> {
 
             MutableComponent props = Component.literal("\n§6Block Tags§f: ");
             Component tags = Styler.formatBlockTags(b);
+
             Component msg = Component.literal("")
                     .append(blockName)
                     .append(props)
@@ -80,6 +74,7 @@ public class InspectBlock implements Command<CommandSourceStack> {
 
     private static int displaySounds(CommandContext<CommandSourceStack> ctx) {
         BlockPos pos = getTarget(ctx.getSource());
+        Map<String, Object> json = new HashMap<>();
         if (pos != null) {
             CommandSourceStack src = ctx.getSource();
             if (src.getEntity() instanceof Player p) {
@@ -89,6 +84,11 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 Component blockName = Styler.formatBlock(b);
 
                 SoundType soundType = b.getSoundType(state, p.level(), pos, p);
+
+                json.put("Hit", soundType.getHitSound().getLocation());
+                json.put("Break", soundType.getBreakSound().getLocation());
+                json.put("Step", soundType.getStepSound().getLocation());
+                json.put("Place", soundType.getPlaceSound().getLocation());
 
                 Component sounds = Component.literal("\n§6Sounds§f: ")
                         .append("\n§cHit§a: §b" + soundType.getHitSound().getLocation())
@@ -173,7 +173,6 @@ public class InspectBlock implements Command<CommandSourceStack> {
                 json.put("SpeedFactor", b.getSpeedFactor());
                 json.put("LightEmission", light);
                 json.put("Flammability", flammability);
-                ExportJSON.export(json, "blockProperties", JsonExportDirs.BLOCK);
 
                 Component props = Component.literal("\n§6Properties§f: ")
                         .append("\n§cHardness§a: ").append("§b" + b.defaultDestroyTime() + "§aF")

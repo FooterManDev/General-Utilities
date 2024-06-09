@@ -3,6 +3,7 @@ package dev.footer.gutils.cmd;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import dev.footer.gutils.lib.Config;
 import dev.footer.gutils.lib.Styler;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -19,11 +20,11 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import java.util.List;
 import java.util.stream.Stream;
 
-@SuppressWarnings("null")
+@SuppressWarnings({"null", "resource", "ConstantConditions"})
 public class InspectBiome implements Command<CommandSourceStack> {
     public static LiteralArgumentBuilder<CommandSourceStack> reg() {
         return Commands.literal("inspectBiome")
-                .executes(new InspectBiome())
+                .executes(new InspectBiome()).requires(src -> src.hasPermission(Config.config.inspectBiomePerm.getAsInt()))
                 .then(Commands.literal("color").executes(InspectBiome::displayColorProps))
                 .then(Commands.literal("tags").executes(InspectBiome::displayTags))
                 .then(Commands.literal("features").executes(InspectBiome::displayFeatures))

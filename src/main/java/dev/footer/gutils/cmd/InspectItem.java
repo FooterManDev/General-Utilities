@@ -3,6 +3,7 @@ package dev.footer.gutils.cmd;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import dev.footer.gutils.lib.Config;
 import dev.footer.gutils.lib.Styler;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.commands.CommandSourceStack;
@@ -25,12 +26,12 @@ import java.util.function.UnaryOperator;
 
 import static net.minecraft.world.item.Rarity.*;
 
-@SuppressWarnings({"SpellCheckingInspection", "Redundant"})
+@SuppressWarnings({"SpellCheckingInspection", "Redundant", "Resource", "unused"})
 public class InspectItem implements Command<CommandSourceStack> {
 
     public static LiteralArgumentBuilder<CommandSourceStack> reg() {
         return Commands.literal("inspectItem")
-                .executes(new InspectItem())
+                .executes(new InspectItem()).requires(src -> src.hasPermission(Config.config.inspectItemPerm.getAsInt()))
                 .then(Commands.literal("food").executes(InspectItem::displayFood))
                 .then(Commands.literal("tags").executes(InspectItem::displayTags))
                 .then(Commands.literal("enchants").executes(InspectItem::displayEnchants));
@@ -136,6 +137,7 @@ public class InspectItem implements Command<CommandSourceStack> {
     @Override
     public int run(CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack src = ctx.getSource();
+        Map<String, Object> json = new HashMap<>();
         if(src.getEntity() instanceof Player p) {
 
             ItemStack stack = p.getMainHandItem();
@@ -183,6 +185,8 @@ public class InspectItem implements Command<CommandSourceStack> {
 //                    atts.append("\n§cAttackDamage§a: ").append("§b" + attackDmg + "§aD");
 //                }
 
+
+
                 Component props = Component.literal("\n§6Properties§f: ")
                         .append(isDmgable)
                         .append("\n§cMaxStackSize§a: ").append("§b" + stack.getMaxStackSize())
@@ -198,7 +202,16 @@ public class InspectItem implements Command<CommandSourceStack> {
                         .append(props)
                         .append(atts);
 
+                int maxDmg = stack.getMaxDamage();
+                int remainingDurability = maxDmg - stack.getDamageValue();
 
+                json.put("Durability", remainingDurability);
+                json.put("MaxDamage", maxDmg);
+                json.put("MaxStackSize", stack.getMaxStackSize());
+                json.put("Enchantability", stack.getEnchantmentValue());
+                json.put("CanBarterWith", stack.isPiglinCurrency());
+                json.put("IsRepairable", stack.isRepairable());
+                json.put("Rarity", stack.getRarity().toString());
 
                 p.sendSystemMessage(msg);
             } else {

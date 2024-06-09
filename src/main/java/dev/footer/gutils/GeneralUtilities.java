@@ -1,9 +1,11 @@
 package dev.footer.gutils;
 
 import dev.footer.gutils.cmd.CmdRegistry;
+import dev.footer.gutils.lib.ClientConfig;
 import dev.footer.gutils.lib.Config;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
@@ -29,6 +31,7 @@ public class GeneralUtilities {
             jsonDir.mkdir();
         }
 
-        container.registerConfig(ModConfig.Type.CLIENT, Config.config, ID + "-client.toml");
+        container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.config, ID + "-client.toml");
+        container.registerConfig(ModConfig.Type.SERVER, Config.spec, ID + "-server.toml");
     }
 }
