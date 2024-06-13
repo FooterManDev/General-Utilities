@@ -1,11 +1,5 @@
-### 2.0
+### 2.1
 
-* Added `inspectBiome` command, to show Biome Properties.
-* `inspectBiome` arguments:
-> `color` | Returns all Color properties. \
-> `tags` | Returns all Biome Tags. \
-> `features` | Returns all Biome Features. \
-> `sounds` | Returns all Biome Sounds.
-* All commands are now camelCase.
-* All commands now return Errors, if something went wrong.
-* Commands that return Tags no longer have Whitespace before tag IDs.
+* Update to 1.21
+* Bumped Neo version : `21.0.0-beta`
+* Updated some Booleans to be Uppercase
