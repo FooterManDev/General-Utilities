@@ -80,10 +80,17 @@ public class InspectItem implements Command<CommandSourceStack> {
 //                    effects.append(effect);
 //                });
 
+                    Component canAlwaysEat;
+                    if(Objects.requireNonNull(stack.getFoodProperties(p)).canAlwaysEat()) {
+                        canAlwaysEat = Component.literal("\n§cCanAlwaysEat§a: ").append("§bTrue");
+                    } else {
+                        canAlwaysEat = Component.literal("\n§cCanAlwaysEat§a: ").append("§bFalse");
+                    }
+
                     Component props = Component.literal("\n§6Food Properties§f: ")
                             .append("\n§cNutrition§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).nutrition())
                             .append("\n§cSaturation§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).saturation())
-                            .append("\n§cCanAlwaysEat§a: ").append("§b" + Objects.requireNonNull(stack.getFoodProperties(p)).canAlwaysEat())
+                            .append(canAlwaysEat)
 //                        .append("\n§cEffects§a: ").append("§b" + effects)
                             ;
 
@@ -110,14 +117,16 @@ public class InspectItem implements Command<CommandSourceStack> {
 
                 Component itemName = Styler.formatItem(stack.getItem());
 
-                ItemEnchantments enchantments = stack.getEnchantments();
+                ItemEnchantments enchantments = stack.getTagEnchantments();
                 MutableComponent enchants = Component.literal("\n§5Enchantments§f: ");
 
                     for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                         Enchantment enchantment = entry.getKey().value();
                         int lvl = entry.getIntValue();
                         enchants.append("\n§c" +
-                                enchantment.getFullname(lvl).plainCopy().getString() + "§a: §d" + lvl);
+                            enchantment.description().plainCopy().getString() + "§a: §d" + lvl
+                        );
+
                 }
 
                 Component msg = Component.literal("")
@@ -137,7 +146,6 @@ public class InspectItem implements Command<CommandSourceStack> {
     @Override
     public int run(CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack src = ctx.getSource();
-        Map<String, Object> json = new HashMap<>();
         if(src.getEntity() instanceof Player p) {
 
             ItemStack stack = p.getMainHandItem();
@@ -185,14 +193,28 @@ public class InspectItem implements Command<CommandSourceStack> {
 //                    atts.append("\n§cAttackDamage§a: ").append("§b" + attackDmg + "§aD");
 //                }
 
+                Component isPiglinCurrency;
+                if(stack.isPiglinCurrency()) {
+                    isPiglinCurrency = Component.literal("\n§cCanBarterWith§a: ").append("§bTrue");
+                } else {
+                    isPiglinCurrency = Component.literal("\n§cCanBarterWith§a: ").append("§bFalse");
+                }
+
+                Component isRepairable;
+                if(stack.isRepairable()) {
+                    isRepairable = Component.literal("\n§cIsRepairable§a: ").append("§bTrue");
+                } else {
+                    isRepairable = Component.literal("\n§cIsRepairable§a: ").append("§bFalse");
+                }
+
 
 
                 Component props = Component.literal("\n§6Properties§f: ")
                         .append(isDmgable)
                         .append("\n§cMaxStackSize§a: ").append("§b" + stack.getMaxStackSize())
                         .append("\n§cEnchantability§a: ").append("§b" + stack.getEnchantmentValue())
-                        .append("\n§cCanBarterWith§a: ").append("§b" + stack.isPiglinCurrency())
-                        .append("\n§cIsRepairable§a: ").append("§b" + stack.isRepairable())
+                        .append(isPiglinCurrency)
+                        .append(isRepairable)
                         .append("\n§cRarity§a: ").append(Character.toUpperCase(stack.getRarity().toString().toLowerCase().charAt(0))
                                 + stack.getRarity().toString().toLowerCase().substring(1)).withStyle(color)
                         ;
@@ -204,14 +226,6 @@ public class InspectItem implements Command<CommandSourceStack> {
 
                 int maxDmg = stack.getMaxDamage();
                 int remainingDurability = maxDmg - stack.getDamageValue();
-
-                json.put("Durability", remainingDurability);
-                json.put("MaxDamage", maxDmg);
-                json.put("MaxStackSize", stack.getMaxStackSize());
-                json.put("Enchantability", stack.getEnchantmentValue());
-                json.put("CanBarterWith", stack.isPiglinCurrency());
-                json.put("IsRepairable", stack.isRepairable());
-                json.put("Rarity", stack.getRarity().toString());
 
                 p.sendSystemMessage(msg);
             } else {
